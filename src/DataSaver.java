@@ -1,5 +1,44 @@
-public class Main {
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Scanner;
+import static java.nio.file.StandardOpenOption.CREATE;
+
+public class DataSaver {
     public static void main(String[] args) {
-        System.out.println("Hello, World!");
+        ArrayList<String> csvRecords = new ArrayList<>();
+        Scanner in = new Scanner(System.in);
+        int idCounter = 1;
+        String moreRecords;
+
+        do {
+            System.out.println("Enter user data:");
+            String firstName = SafeInput.getNonZeroLenString(in, "First Name");
+            String lastName = SafeInput.getNonZeroLenString(in, "Last Name");
+            String idNumber = String.format("%06d", idCounter++); // ID as a zero-padded 6-digit number
+            String email = SafeInput.getNonZeroLenString(in, "Email");
+            int yearOfBirth = SafeInput.getInt(in, "Year of Birth (4 digits)");
+
+            String record = String.format("%s, %s, %s, %s, %d", firstName, lastName, idNumber, email, yearOfBirth);
+            csvRecords.add(record);
+            moreRecords = SafeInput.getNonZeroLenString(in, "Do you want to add another record? (Y/N)").toLowerCase();
+
+        } while (moreRecords.startsWith("y"));
+
+        String fileName = SafeInput.getNonZeroLenString(in, "Enter the CSV file name (e.g., data.csv)");
+        if (!fileName.endsWith(".csv")) {
+            fileName += ".csv";
+        }
+
+        try (FileWriter writer = new FileWriter("src/" + fileName)) {
+            for (String record : csvRecords) {
+                writer.write(record + "\n");
+            }
+            System.out.println("Data saved successfully to " + fileName);
+        } catch (IOException e) {
+            System.err.println("Error writing to file " + e.getMessage());
+        }
     }
 }
